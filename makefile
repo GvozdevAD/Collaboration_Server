@@ -33,7 +33,7 @@ help:
 	@echo "  run_mi           - Запустить отдельно контейнер для MinIO."
 	@echo "  stop_mi          - Остановить и удалить контейнер MinIO."
 	@echo "  clean_mi         - Удалить образ MinIO."
-	@echo "  conn_mi		  - Подключится к контейнеру MinIO через bash."
+	@echo "  conn_mi	  - Подключится к контейнеру MinIO через bash."
 
 	@echo "----------- Логи -----------"
 	@echo "  logs_all          - Показать логи всех контейнеров."
