@@ -1,0 +1,76 @@
+services:
+  postgres_image:
+    build: ./postgresql/.
+    container_name: postgres_db
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PWD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - internal_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  minio_image:
+    build: ./minio/.
+    container_name: minio
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MINIO_SERVER: ${MINIO_SERVER}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
+      MINIO_TMS_USER: ${MINIO_TMS_USER}
+      MINIO_TMS_PASSWORD: ${MINIO_TMS_PASSWORD}
+      MINIO_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY_ID}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    volumes:
+      - minio_data:/data
+    networks:
+      - internal_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://minio:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  collab_server:
+    build: ./collab_serv/.
+    container_name: collab_server
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - postgres_image
+      - minio_image
+    volumes:
+      - cs_data:/var/cs
+    ports:
+      - "9090:9090"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8087/rs/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 50s
+    networks:
+      - internal_net
+      - external_net
+
+volumes:
+  pgdata:
+  minio_data:
+  cs_data:
+
+networks:
+  internal_net:
+    internal: true
+  external_net:

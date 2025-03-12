@@ -1,0 +1,14 @@
+FROM postgres:17.3
+
+RUN apt-get update && \
+    apt-get install -y locales tzdata && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN localedef -i ru_RU -c -f UTF-8 -A /usr/share/locale/locale.alias ru_RU.UTF-8
+
+ENV LANG=ru_RU.UTF-8
+
+ENV TZ=Europe/Moscow
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+COPY ./init-scripts/init.sql /docker-entrypoint-initdb.d/
