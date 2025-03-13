@@ -29,14 +29,15 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
-      MINIO_TMS_USER: ${MINIO_TMS_USER}
-      MINIO_TMS_PASSWORD: ${MINIO_TMS_PASSWORD}
       MINIO_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY_ID}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
     volumes:
       - minio_data:/data
+    ports:
+      - "9000:9000"
     networks:
       - internal_net
+      - external_net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://minio:9000/minio/health/live"]
       interval: 30s
