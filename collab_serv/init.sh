@@ -8,7 +8,7 @@ if [[ -z "$MINIO_SERVER" || -z "$MINIO_BUCKET_NAME" || -z "$MINIO_ACCESS_KEY_ID"
 fi
 
 echo "Ожидаем запуска MinIO..."
-until curl -s "$MINIO_SERVER/minio/health/live" >/dev/null 2>&1; do
+until curl -s "http://minio:9000/minio/health/live" >/dev/null 2>&1; do
     echo "MinIO ещё не готов, ждём 3 секунды..."
     sleep 3
 done
@@ -52,19 +52,8 @@ if ! ring cs --instance csdev websocket set-params --port 9090; then
     exit 1
 fi
 
-echo "Запуск сервисов..."
-if ! ring hazelcast --instance hcdev service start; then
-    echo "ERROR: Не удалось запустить Hazelcast."
-    exit 1
-fi
-if ! ring elasticsearch --instance esdev service start; then
-    echo "ERROR: Не удалось запустить Elasticsearch."
-    exit 1
-fi
-if ! ring cs --instance csdev service start; then
-    echo "ERROR: Не удалось запустить сервис CS."
-    exit 1
-fi
+./restart.sh
+
 
 echo "Ожидаем готовности сервиса на порту 8087..."
 until curl -s "http://localhost:8087" >/dev/null 2>&1; do
